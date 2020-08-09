@@ -44,12 +44,12 @@ def tally_tasks(tasks: List[Task]) -> tuple:
 
 SORTING_FUNCTIONS = {
     'as_they_come': lambda tasks: tasks,
-    'due_first': lambda tasks: tasks.sort(key=lambda task: task.deadline),
-    'due_last': lambda tasks: tasks.sort(key=lambda task: task.deadline, reverse=True),
-    'important_first': lambda tasks: tasks.sort(key=lambda task: task.priority, reverse=True),
-    'easier_first': lambda tasks: tasks.sort(key=lambda task: task.duration),
-    'easier_important_first': lambda tasks: tasks.sort(key=lambda task: (task.duration, 100 - task.priority), reverse=True),
-    'easier_due_first': lambda tasks: tasks.sort(key=lambda task: (task.duration, task.deadline), reverse=True)
+    'due_first': lambda tasks: sorted(tasks, key=lambda task: task.deadline),
+    'due_last': lambda tasks: sorted(tasks, key=lambda task: task.deadline, reverse=True),
+    'important_first': lambda tasks: sorted(tasks, key=lambda task: task.priority, reverse=True),
+    'easier_first': lambda tasks: sorted(tasks, key=lambda task: task.duration),
+    'easier_important_first': lambda tasks: sorted(tasks, key=lambda task: (task.duration, 100 - task.priority), reverse=True),
+    'easier_due_first': lambda tasks: sorted(tasks, key=lambda task: (task.duration, task.deadline), reverse=True)
 }
 
 def run_simulation(hours_per_day: int, tasks: List[Task], sim_type: str = 'as_they_come',):
@@ -78,10 +78,9 @@ def run_simulation(hours_per_day: int, tasks: List[Task], sim_type: str = 'as_th
 def analyse_task_set(hours_per_day: int, tasks: List[Task]) -> dict:
     """Function used to analyse a particular
     task set"""
-
     results = {}
     for sim_type in SORTING_FUNCTIONS:
-        completed, important_completed, completed_in_time = run_simulation(hours_per_day, copy.copy(tasks), sim_type=sim_type)
+        completed, important_completed, completed_in_time = run_simulation(hours_per_day, copy.deepcopy(tasks), sim_type=sim_type)
         results[sim_type] = {
             'completed': completed,
             'important_completed': important_completed,
