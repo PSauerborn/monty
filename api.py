@@ -1,8 +1,9 @@
 """Module containing API functions"""
 
 import logging
+import json
 
-from bottle import Bottle, request, abort
+from bottle import Bottle, request, response, abort
 
 from config import LISTEN_ADDRESS, LISTEN_PORT
 from data_models import dataclass_response, extract_request_body, HTTPResponse, NewTaskRequest
@@ -10,7 +11,17 @@ from data_models import dataclass_response, extract_request_body, HTTPResponse, 
 
 LOGGER = logging.getLogger(__name__)
 
+def custom_error(error_details: str) -> dict: # pragma: no cover
+    """Function used as custom error handler when
+    uncaught exceptions are raised"""
+    LOGGER.debug(error_details)
+    # extract HTTP code and message from request body
+    code, message = response.status_code, response.body
+    response.content_type = 'application/json'
+    return json.dumps({'success': False, 'http_code': code, 'message': message})
+
 APP = Bottle()
+APP.default_error_handler = custom_error
 
 @APP.route('/health', method=['GET', 'OPTIONS'])
 @dataclass_response

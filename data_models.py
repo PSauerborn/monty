@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Optional
 
-from bottle import request
+from bottle import request, abort
 from pydantic import BaseModel, ValidationError
 
 
