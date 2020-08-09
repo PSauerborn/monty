@@ -51,3 +51,16 @@ LISTEN_ADDRESS = override_value('LISTEN_ADDRESS', '0.0.0.0')
 LISTEN_PORT = override_value('LISTEN_PORT', 10999)
 
 TASK_PRIORITY_THRESHOLD = override_value('task_priority_threshold', 0.75)
+
+POSTGRES_PORT = override_value('postgres_port', 5432)
+POSTGRES_HOST = override_value('postgres_host', 'localhost')
+POSTGRES_USER = override_value('postgres_user', 'postgres')
+POSTGRES_PASSWORD = override_value('postgres_password', '')
+POSTGRES_DB = override_value('postgres_db', 'monty')
+
+def get_postgres_connection_string() -> str:
+    """Function used go generate the postgres
+    connection string"""
+    return f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
+
+DB_CONNECTION_STRING = get_postgres_connection_string()

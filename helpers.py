@@ -22,9 +22,17 @@ def get_tasks(input_file: str = './tasks.json') -> list:
         data = json.load(f)
     return [Task(**task) for task in data['tasks']]
 
-def create_tasks(count: int, output: str = './tasks.json', save: bool = False):
+def create_tasks(count: int, output: str = './tasks.json', save: bool = False) -> List[Task]:
     """Function used to create tasks that are saved
-    to a local JSON file"""
+    to a local JSON file to use for testing
+
+    Arguments:
+        count: int number of tasks to create
+        output: str output path of task JSON file
+        save: bool save to local disk if True
+    Returns:
+        list of Task objects
+    """
     tasks = []
     now = datetime(2020, 8, 9)
     deadline_dist, duration_dist = np.round(np.random.exponential(5, 10000)), np.round(np.random.exponential(7, 10000))
