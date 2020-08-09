@@ -5,6 +5,7 @@ import json
 import uuid
 from math import floor
 
+from typing import List
 from datetime import datetime, timedelta
 from random import randint, choice, uniform
 

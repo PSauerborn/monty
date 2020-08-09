@@ -64,7 +64,7 @@ def get_user_details(conn: object, cursor: object, uid: str):
     return cursor.fetchone()
 
 @database_function
-def create_task(conn: object, cursor: object, user_id: uuid.UUID, body: NewTaskRequest):
+def create_user_task(conn: object, cursor: object, user_id: uuid.UUID, body: NewTaskRequest):
     """Function used to retrieve a single user details"""
     task_id = uuid.uuid4()
     args = (str(task_id), str(user_id), body.content, body.priority, body.duration, body.deadline, None)
@@ -94,6 +94,7 @@ def get_task(conn: object, cursor: object, task_id: uuid.UUID):
 if __name__ == '__main__':
 
 
-    task = NewTaskRequest(content='testing task', priority=45, duration=6, deadline=datetime.utcnow() + timedelta(hours=12))
+    # task = NewTaskRequest(content='testing task', priority=45, duration=6, deadline=datetime.utcnow() + timedelta(hours=12))
 
-    print(get_task('46649e01-0fb3-47a1-a974-e62021216319'))
+    task = get_task('46649e01-0fb3-47a1-a974-e62021216319')
+    print(dict(task))
