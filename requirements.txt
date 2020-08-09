@@ -1,0 +1,5 @@
+bottle
+pydantic
+psycopg2
+numpy
+matplotlib
