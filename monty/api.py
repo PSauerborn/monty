@@ -11,6 +11,7 @@ from persistence import get_user_tasks, get_user_details, create_user_task, comp
 from data_models import dataclass_response, extract_request_body, HTTPResponse, NewTaskRequest, \
     Task
 from simulation import analyse_task_set
+from authenticate import AuthenticationPlugin
 
 
 LOGGER = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def custom_error(error_details: str) -> dict: # pragma: no cover
 APP = Bottle()
 APP.default_error_handler = custom_error
 
-@APP.route('/health', method=['GET', 'OPTIONS'])
+@APP.route('/monty/health', method=['GET', 'OPTIONS'])
 @dataclass_response
 def health_check() -> HTTPResponse:
     """API route used to perform a health check
@@ -38,7 +39,7 @@ def health_check() -> HTTPResponse:
     """
     return HTTPResponse(success=True, http_code=200, message='api running')
 
-@APP.route('/task/<uid>', method=['POST', 'OPTIONS'])
+@APP.route('/monty/task', method=['POST', 'OPTIONS'])
 @extract_request_body(NewTaskRequest, source='json', raise_on_error=True)
 @dataclass_response
 def create_task(body: NewTaskRequest, uid: str) -> HTTPResponse:
@@ -50,19 +51,14 @@ def create_task(body: NewTaskRequest, uid: str) -> HTTPResponse:
     Returns:
         HTTPResponse containing response
     """
-    LOGGER.debug('received request to create new task %s for user %s', body, uid)
-    user = get_user_details(uid)
-    if not user:
-        return HTTPResponse(success=False, http_code=404, message='invalid user ' + uid)
-    else:
-        user = dict(user)
+    LOGGER.debug('received request to create new task %s for user %s', body, request.claims.uid)
     # create task in database and return task ID
-    task_id = create_user_task(user['user_id'], body)
+    task_id = create_user_task(request.claims.uid, body)
     return HTTPResponse(success=True, http_code=200, payload={'task_id': str(task_id)})
 
-@APP.route('/task/<uid>', method=['GET', 'OPTIONS'])
+@APP.route('/monty/tasks', method=['GET', 'OPTIONS'])
 @dataclass_response
-def get_tasks(uid: str) -> HTTPResponse:
+def get_tasks() -> HTTPResponse:
     """API route used to create new task
     objects in the postgres database
 
@@ -71,14 +67,14 @@ def get_tasks(uid: str) -> HTTPResponse:
     Returns:
         HTTPResponse containing response
     """
-    LOGGER.debug('received request to retrieve tasks for user %s', uid)
-    return HTTPResponse(success=True, http_code=200, payload=get_user_tasks(uid))
+    LOGGER.debug('received request to retrieve tasks for user %s', request.claims.uid)
+    return HTTPResponse(success=True, http_code=200, payload=get_user_tasks(request.claims.uid))
 
 TASK_PATCH_OPERATIONS = {
     'COMPLETE': complete_task
 }
 
-@APP.route('/task/<task_id>', method=['PATCH', 'OPTIONS'])
+@APP.route('/monty/task/<task_id>', method=['PATCH', 'OPTIONS'])
 @dataclass_response
 def update_task(task_id: str) -> HTTPResponse:
     """API route used to create new task
@@ -100,7 +96,7 @@ def update_task(task_id: str) -> HTTPResponse:
     abort(400, 'invalid operation')
 
 
-@APP.route('/simulation/<uid>', method=['GET', 'OPTIONS'])
+@APP.route('/monty/simulation/<uid>', method=['GET', 'OPTIONS'])
 @dataclass_response
 def run_user_simulation(uid: str) -> HTTPResponse:
     """API route used to create new task
@@ -112,14 +108,10 @@ def run_user_simulation(uid: str) -> HTTPResponse:
         HTTPResponse containing response
     """
     LOGGER.debug('received request to run simulations for user %s', uid)
-    user = get_user_details(uid)
-    if not user:
-        return HTTPResponse(success=False, http_code=404, message='invalid user ' + uid)
-    else:
-        user = dict(user)
-    tasks = [Task(**dict(row)) for row in get_user_tasks(uid)]
+    tasks = [Task(**dict(row)) for row in get_user_tasks(request.claims.uid)]
     return HTTPResponse(success=True, http_code=200, payload=analyse_task_set(8, tasks))
 
 if __name__ == '__main__':
 
+    APP.install(AuthenticationPlugin())
     APP.run(host=LISTEN_ADDRESS, port=LISTEN_PORT, server='waitress')

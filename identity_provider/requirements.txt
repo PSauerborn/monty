@@ -1,5 +1,5 @@
 bottle
 pydantic
 psycopg2
-numpy
-matplotlib
+waitress
+pyjwt

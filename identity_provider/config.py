@@ -1,4 +1,4 @@
-"""Module containing configuration settings for the enerlytics Identity Provider"""
+"""Module containing configuration settings for the monty Identity Provider"""
 
 import logging
 import os
@@ -45,12 +45,11 @@ LOG_LEVELS = {
 LOG_LEVEL = LOG_LEVELS.get(override_value('log_level', 'DEBUG'), logging.DEBUG)
 logging.basicConfig(level=LOG_LEVEL)
 
-logging.getLogger('matplotlib').setLevel(level=logging.WARN)
-
 LISTEN_ADDRESS = override_value('LISTEN_ADDRESS', '0.0.0.0')
-LISTEN_PORT = override_value('LISTEN_PORT', 10999)
+LISTEN_PORT = override_value('LISTEN_PORT', 10081)
 
-TASK_PRIORITY_THRESHOLD = override_value('task_priority_threshold', 0.75)
+JWT_SECRET = override_value('jwt_secret', '')
+JWT_EXPIRY = override_value('jwt_expiry', 60)
 
 POSTGRES_PORT = override_value('postgres_port', 5432)
 POSTGRES_HOST = override_value('postgres_host', 'localhost')
