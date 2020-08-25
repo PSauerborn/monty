@@ -27,7 +27,7 @@ def get_important_tasks(tasks: List[Task]) -> List[Task]:
         list of Task objects that are important
     """
     percentile = round(TASK_PRIORITY_THRESHOLD * len(tasks))
-    return sorted(tasks, key=lambda task: task.priority)[percentile:len(tasks)]
+    return sorted(tasks, key=lambda task: task.priority, reverse=True)[percentile:len(tasks)]
 
 def get_completed_tasks(tasks: List[Task]) -> List[Task]:
     """Function used to return all completed tasks
@@ -95,8 +95,9 @@ def run_simulation(hours_per_day: int, tasks: List[Task], sim_type: str = 'as_th
         tuple containing (completed, important_completed, completed_in_time)
     """
     # evaluate total time available for task and end time of simulation
-    total_time = sum([task.duration for task in tasks]) * (hours_per_day / 24)
+    total_time = sum([task.duration for task in tasks]) * (24 / hours_per_day)
     end = datetime.utcnow() + timedelta(hours=total_time)
+    LOGGER.debug('running simulation with end date %s', end)
     sorter = SORTING_FUNCTIONS.get(sim_type, None)
     if sorter is None:
         raise
@@ -104,11 +105,13 @@ def run_simulation(hours_per_day: int, tasks: List[Task], sim_type: str = 'as_th
     sorted_tasks, task_finish = sorter(tasks), datetime.utcnow()
     completed = []
     for i, task in enumerate(sorted_tasks):
+        LOGGER.debug('simulating task %s', task)
         # evaluate end time of task given duration
-        task_finish += timedelta(task.duration)
+        task_finish += timedelta(hours=task.duration)
+        LOGGER.debug('calculated task finish time as %s', task_finish)
         # end simulation if total time has exceeded limit
         if task_finish > end:
-            LOGGER.info('finished running simulation type %s. completed tasks (%s) / (%s)', sim_type, i + 1, len(tasks))
+            LOGGER.info('finished running simulation type %s in %s iterations. completed tasks (%s) / (%s)', sim_type, i, i + 1, len(tasks))
             break
         # else complete task
         task.completion_date = task_finish

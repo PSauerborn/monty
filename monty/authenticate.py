@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 import jwt
-from bottle import request, abort
+from bottle import request, response, abort
 from pydantic import BaseModel, ValidationError
 
 from config import JWT_SECRET
@@ -37,6 +37,15 @@ def parse_jwt_token(token: str) -> dict:
     into claims"""
     return TokenModel(**jwt.decode(token, JWT_SECRET, algorithms=['HS256']))
 
+def set_cors_headers():
+    """Helper function used to set CORS headers"""
+    if 'Origin' in request.headers:
+            response.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
+    else:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    # set allowed  methods and headers
+    response.set_header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+    response.set_header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, X-Authenticated-Userid")
 
 class AuthenticationPlugin:
     """Bottle plugin used to check token authentication
@@ -54,19 +63,23 @@ class AuthenticationPlugin:
         """Function used to apply authorization decorator
         to bottle application"""
         def wrapper(*args: tuple, **kwargs: dict):
+            if request.method == 'OPTIONS':
+                set_cors_headers()
+                return
             if (token := extract_access_token()) is not None:
                 try:
                     # parse JWT token and inject into request headers
                     request.claims = parse_jwt_token(token)
                     LOGGER.debug('successfully parsed login token %s', request.claims)
-                    return callback(*args, **kwargs)
                 except (jwt.InvalidSignatureError, ValidationError):
                     LOGGER.exception('received invalid JWT')
                     abort(401, 'unauthorized')
                 except jwt.ExpiredSignatureError:
                     LOGGER.exception('received expired JWT')
                     abort(401, 'access token expired')
-            abort(401, 'missing access token')
+            else:
+                abort(401, 'missing access token')
+            return callback(*args, **kwargs)
         return wrapper
 
 

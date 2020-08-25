@@ -4,11 +4,11 @@ import logging
 import json
 import uuid
 
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, Optional
 
 from bottle import request, abort
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, Field
 
 
 LOGGER = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ def dataclass_response(func: object):
         LOGGER.warning('received non-dataclass response %s', response)
         return response
     return wrapper
+
 
 REQUEST_BODY_SOURCES = {
     'json': lambda: request.json
@@ -58,16 +59,20 @@ class HTTPResponse(BaseModel):
 
 class NewTaskRequest(BaseModel):
     """Dataclass contianing request for new task"""
+    task_title: str
     content: str
     priority: int
     duration: int
-    deadline: datetime
+    deadline: date
 
 class Task(BaseModel):
     """Dataclass contining monte carlo task"""
     task_id: uuid.UUID
+    task_title: str
     content: str
     priority: int
     duration: int
+    hours_remaining: int
+    created: datetime
     deadline: datetime
     completion_date: Optional[datetime]

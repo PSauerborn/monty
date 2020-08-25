@@ -5,8 +5,6 @@ services:
     build:
       context: ./monty
     container_name: monty
-    ports:
-    - "10999:10999"
     networks:
     - monty
     - postgres-local
@@ -15,13 +13,12 @@ services:
       POSTGRES_HOST: postgres-local
       POSTGRES_PASSWORD: monty-dev
       JWT_SECRET: qJNJvkW2uVWtuPjN
+      JWT_EXPIRY: 180
 
   monty-identity-provider:
     build:
       context: ./identity_provider
     container_name: identity_provider
-    ports:
-    - "10081:10081"
     networks:
     - monty
     - postgres-local
@@ -36,7 +33,7 @@ services:
       context: ./reverse_proxy
     container_name: reverse_proxy
     ports:
-    - "8080:8080"
+    - "8081:8080"
     networks:
     - monty
     environment:
