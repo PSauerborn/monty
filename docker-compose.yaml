@@ -14,17 +14,17 @@ services:
       POSTGRES_PASSWORD: monty-dev
       JWT_SECRET: qJNJvkW2uVWtuPjN
 
-  # monty-frontend:
-  #   build:
-  #     context: ./frontend
-  #   container_name: monty-frontend
-  #   networks:
-  #   - monty
+  monty-frontend:
+    build:
+      context: ./frontend
+    container_name: monty-frontend
+    networks:
+    - monty
 
   monty-identity-provider:
     build:
       context: ./identity_provider
-    container_name: identity_provider
+    container_name: identity-provider
     networks:
     - monty
     - postgres-local
@@ -38,7 +38,7 @@ services:
   reverse-proxy:
     build:
       context: ./reverse_proxy
-    container_name: reverse_proxy
+    container_name: reverse-proxy
     ports:
     - "8081:8080"
     networks:
