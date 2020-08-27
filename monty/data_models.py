@@ -65,6 +65,10 @@ class NewTaskRequest(BaseModel):
     duration: int
     deadline: date
 
+class TaskUpdateRequest(BaseModel):
+    """Dataclass containing request for updating tasks"""
+    remaining_hours: Optional[int]
+
 class Task(BaseModel):
     """Dataclass contining monte carlo task"""
     task_id: uuid.UUID
@@ -76,3 +80,4 @@ class Task(BaseModel):
     created: datetime
     deadline: datetime
     completion_date: Optional[datetime]
+

@@ -1,5 +1,8 @@
 <template>
     <v-sheet>
+        <v-dialog v-model="dialog" max-width="20%">
+            <UpdateTaskModal ref="updateModal" :remainingHours="task.hours_remaining" @hoursUpdated="editTask"/>
+        </v-dialog>
         <v-card :id="task.task_id">
             <v-row class="text-center" style="font-size:12px">
                 <v-col cols=3>
@@ -17,12 +20,26 @@
             </v-row>
 
             <v-divider class="mx-4"></v-divider>
-            <v-card-title>
-                {{ task.task_title }}
-            </v-card-title>
-            <v-card-subtitle>
-                {{ task.task_id }}
-            </v-card-subtitle>
+            <v-row>
+                <v-col cols=9>
+                    <v-card-title>
+                        <span :class="{ crossedOut: completed }">{{ task.task_title }}</span>
+                    </v-card-title>
+                    <v-card-subtitle>
+                        {{ task.task_id }}
+                    </v-card-subtitle>
+                </v-col>
+                <v-col cols=1 align="right" justify="right">
+                    <v-btn icon>
+                        <v-icon @click.stop="dialog=true">mdi-circle-edit-outline</v-icon>
+                    </v-btn>
+                </v-col>
+                <v-col cols=2 align="left" justify="left">
+                    <v-btn icon>
+                        <v-icon @click="completeTask">mdi-check-all</v-icon>
+                    </v-btn>
+                </v-col>
+            </v-row>
             <v-divider class="mx-4"></v-divider>
 
             <v-row class="text-center" style="font-size:12px">
@@ -43,12 +60,15 @@
 
 <script>
 
+import axios from 'axios'
 import moment from 'moment'
+
+import UpdateTaskModal from './UpdateTaskModal'
 
 export default {
     name: "TaskItem",
     components: {
-
+        UpdateTaskModal
     },
     props: {
         task: {
@@ -67,6 +87,74 @@ export default {
     methods: {
         deleteTask: function() {
             this.$emit('deleteTask', this.task.task_id)
+        },
+        editTask: function(remainingHours) {
+            this.dialog = false;
+            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=UPDATE'
+
+            // generate request headers using access token
+            let headers = {'Authorization': 'Bearer ' + accessToken}
+            let vm = this;
+
+            axios({
+                method: 'patch',
+                url: url,
+                headers: headers,
+                data: {remaining_hours: remainingHours }
+            }).then(function (response) {
+                // parse payload and display notification
+                console.log(response)
+                 vm.$notify({
+                    group: 'main',
+                    title: ' monty backend',
+                    type: 'success',
+                    text: 'successfully edited task ' + vm.task.task_id
+                })
+                vm.$emit('taskUpdated')
+            }).catch(function (error) {
+                console.log(error)
+                vm.$notify({
+                    group: 'main',
+                    title: ' monty backend',
+                    type: 'error',
+                    text: 'unable to edit task'
+                })
+            })
+        },
+        completeTask: function() {
+            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=COMPLETE'
+
+            // generate request headers using access token
+            let headers = {'Authorization': 'Bearer ' + accessToken}
+            let vm = this;
+
+            axios({
+                method: 'patch',
+                url: url,
+                headers: headers,
+                data: {}
+            }).then(function (response) {
+                // parse payload and display notification
+                console.log(response)
+                 vm.$notify({
+                    group: 'main',
+                    title: ' monty backend',
+                    type: 'success',
+                    text: 'successfully completed task ' + vm.task.task_id
+                })
+                // sort tasks according to the currently active sort function
+                vm.$emit('taskUpdated')
+            }).catch(function (error) {
+                console.log(error)
+                vm.$notify({
+                    group: 'main',
+                    title: ' monty backend',
+                    type: 'error',
+                    text: 'unable to complete task'
+                })
+            })
         }
     },
     computed: {
@@ -78,15 +166,20 @@ export default {
         },
         deadlineDate: function() {
             return moment(String(this.task.deadline)).format('MM/DD/YYYY')
+        },
+        completed: function() {
+            console.log(this.task.completion_date)
+            return this.task.completion_date != null
         }
     },
     data() {
         return {
+            dialog: false,
             taskColors: {
-                1: "5px solid red",
+                1: "5px solid #FF4B4B",
                 2: "5px solid #FFA232",
                 3: "5px solid #FFFA63",
-                4: "5px solid #6DFF73",
+                4: "5px solid #C7FF4B",
                 5: "5px solid #6DCCFF"
             }
         }
@@ -101,5 +194,9 @@ export default {
 </script>
 
 <style scoped>
+
+.crossedOut {
+    text-decoration: line-through;
+}
 
 </style>

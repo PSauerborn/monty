@@ -7,9 +7,9 @@ from bottle import Bottle, request, response, abort
 
 from config import LISTEN_ADDRESS, LISTEN_PORT
 from persistence import get_user_tasks, get_user_details, create_user_task, complete_task, \
-    get_task, get_user_task, delete_task
+    get_task, get_user_task, delete_task, update_task_hours
 from data_models import dataclass_response, extract_request_body, HTTPResponse, NewTaskRequest, \
-    Task
+    Task, TaskUpdateRequest
 from simulation import analyse_task_set
 from authenticate import AuthenticationPlugin
 
@@ -94,13 +94,15 @@ def get_tasks() -> HTTPResponse:
     return HTTPResponse(success=True, http_code=200, payload=get_user_tasks(request.claims.uid))
 
 TASK_PATCH_OPERATIONS = {
-    'COMPLETE': complete_task
+    'COMPLETE': complete_task,
+    'UPDATE': update_task_hours
 }
 
 @APP.route('/monty/task/<task_id>', method=['PATCH', 'OPTIONS'])
 @cors
+@extract_request_body(TaskUpdateRequest, source='json', raise_on_error=True)
 @dataclass_response
-def update_task(task_id: str) -> HTTPResponse:
+def update_task(body: TaskUpdateRequest, task_id: str) -> HTTPResponse:
     """API route used to create new task
     objects in the postgres database
 
@@ -115,7 +117,7 @@ def update_task(task_id: str) -> HTTPResponse:
     if not task:
         abort(400, 'invalid task id ' + task_id)
     if (handler := TASK_PATCH_OPERATIONS.get(operation, None)) is not None:
-        handler(task_id)
+        handler(task_id, body)
         return HTTPResponse(success=True, http_code=200, message='successfully update task ' + task_id)
     abort(400, 'invalid operation')
 

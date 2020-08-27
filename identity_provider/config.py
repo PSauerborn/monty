@@ -49,7 +49,7 @@ LISTEN_ADDRESS = override_value('LISTEN_ADDRESS', '0.0.0.0')
 LISTEN_PORT = override_value('LISTEN_PORT', 10081)
 
 JWT_SECRET = override_value('jwt_secret', '')
-JWT_EXPIRY = override_value('jwt_expiry', 60)
+JWT_EXPIRY = override_value('jwt_expiry', 120)
 
 POSTGRES_PORT = override_value('postgres_port', 5432)
 POSTGRES_HOST = override_value('postgres_host', 'localhost')

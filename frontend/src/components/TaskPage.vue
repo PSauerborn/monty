@@ -3,7 +3,7 @@
         <v-row align="center" justify="center">
             <v-col cols=8>
                 <v-dialog v-model="dialog" max-width="50%">
-                    <NewTaskModal  ref="modal" @taskCreated="updateTasks"/>
+                    <NewTaskModal  ref="modal" @taskCreated="updateTasks" @taskUpdated="updateTasks"/>
                 </v-dialog>
                 <v-toolbar>
                     <v-icon>mdi-apps</v-icon>
@@ -13,9 +13,6 @@
                     <v-toolbar-items>
                         <v-btn icon @click.stop="dialog = true">
                             <v-icon>mdi-plus-box-multiple</v-icon>
-                        </v-btn>
-                        <v-btn icon>
-                            <v-icon>mdi-circle-edit-outline</v-icon>
                         </v-btn>
                         <v-menu offset-y>
                             <template v-slot:activator="{ on }">
@@ -45,7 +42,7 @@
         </v-row>
         <v-row v-for="task in tasks" :key="task.task_id" class="text-center" align="center" justify="center">
             <v-col cols=6>
-                <TaskItem v-bind:task="task" @deleteTask="deleteTask"/>
+                <TaskItem v-bind:task="task" @deleteTask="deleteTask" @taskUpdated="updateTasks"/>
             </v-col>
         </v-row>
     </v-container>

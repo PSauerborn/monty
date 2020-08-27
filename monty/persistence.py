@@ -73,10 +73,20 @@ def create_user_task(conn: object, cursor: object, user_id: uuid.UUID, body: New
     return task_id
 
 @database_function
-def complete_task(conn: object, cursor: object, task_id: str):
+def complete_task(conn: object, cursor: object, task_id: str, body):
     """Function used to retrieve a single user details"""
     cursor.execute('UPDATE tasks SET completion_date=%s WHERE task_id=%s', (datetime.utcnow(), task_id))
     conn.commit()
+
+@database_function
+def update_task_hours(conn: object, cursor: object, task_id: str, body):
+    """Function used to retrieve a single user details"""
+    if body.remaining_hours:
+        LOGGER.debug('updating task with body %s', body)
+        cursor.execute('UPDATE tasks SET hours_remaining=%s WHERE task_id=%s', (body.remaining_hours, task_id))
+        conn.commit()
+    else:
+        LOGGER.warning('received no update hours')
 
 @database_function
 def get_user_tasks(conn: object, cursor: object, uid: str):

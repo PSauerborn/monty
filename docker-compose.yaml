@@ -1,10 +1,10 @@
 version: '3.7'
 services:
 
-  monty-server:
+  monty-backend:
     build:
       context: ./monty
-    container_name: monty
+    container_name: monty-backend
     networks:
     - monty
     - postgres-local
@@ -13,7 +13,13 @@ services:
       POSTGRES_HOST: postgres-local
       POSTGRES_PASSWORD: monty-dev
       JWT_SECRET: qJNJvkW2uVWtuPjN
-      JWT_EXPIRY: 180
+
+  # monty-frontend:
+  #   build:
+  #     context: ./frontend
+  #   container_name: monty-frontend
+  #   networks:
+  #   - monty
 
   monty-identity-provider:
     build:
@@ -27,6 +33,7 @@ services:
       POSTGRES_HOST: postgres-local
       POSTGRES_PASSWORD: monty-dev
       JWT_SECRET: qJNJvkW2uVWtuPjN
+      JWT_EXPIRY: 180
 
   reverse-proxy:
     build:

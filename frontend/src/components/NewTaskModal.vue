@@ -97,7 +97,7 @@ export default {
     name: "NewTaskModal",
     components: {
         ValidationProvider,
-        ValidationObserver,
+        ValidationObserver
     },
     props: {
 
@@ -165,6 +165,7 @@ export default {
     },
     data() {
         return {
+            dialog: false,
             taskTitle: "",
             taskContent: "",
             taskPriority: "",
