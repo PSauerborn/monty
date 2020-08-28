@@ -33,7 +33,12 @@ export default {
          * Function used to run simulation with given user tasks
          */
         runSimulation: function() {
-            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            // extract access token and URL from environment variables
+            const accessToken = localStorage.getItem('userToken')
+            if (!accessToken) {
+                window.location.replace("http://localhost:8081/login")
+                return
+            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/simulation'
 
             // generate request headers using access token
@@ -62,6 +67,10 @@ export default {
                     type: 'error',
                     text: 'failed to run task simulation'
                 })
+                if (error.status === 401) {
+                    window.location.replace("http://localhost:8081/login")
+                    return
+                }
             })
         },
         formatSimType: function(simType) {

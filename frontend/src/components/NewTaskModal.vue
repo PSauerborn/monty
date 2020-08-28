@@ -132,7 +132,12 @@ export default {
             }
 
             // extract access token and URL from environment variables
-            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            const accessToken = localStorage.getItem('userToken')
+            if (!accessToken) {
+                window.location.replace("http://localhost:8081/login")
+                return
+            }
+
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task'
             // generate request headers using access token
             let headers = {'Authorization': 'Bearer ' + accessToken}
@@ -160,6 +165,10 @@ export default {
                     type: 'error',
                     text: 'failed to create new task'
                 })
+                if (error.status === 401) {
+                    window.location.replace("http://localhost:8081/login")
+                    return
+                }
             })
         },
     },

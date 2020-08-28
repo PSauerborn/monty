@@ -30,6 +30,8 @@ def cors(func: object) -> object: # pragma: no cover
     route. [GET, POST, PATCH, PUT, DELETE, OPTIONS] are all
     currently valid requests methods"""
     def wrapper(*args: tuple, **kwargs: dict) -> object:
+        if request.method == 'OPTIONS':
+            return
 
         if 'Origin' in request.headers:
             response.headers['Access-Control-Allow-Origin'] = request.headers['Origin']

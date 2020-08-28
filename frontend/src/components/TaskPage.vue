@@ -35,7 +35,9 @@
                                 </v-list>
                             </v-card>
                         </v-menu>
-
+                        <v-btn icon @click="logout">
+                            <v-icon>mdi-location-exit</v-icon>
+                        </v-btn>
                     </v-toolbar-items>
                 </v-toolbar>
             </v-col>
@@ -61,6 +63,10 @@ export default {
         NewTaskModal
     },
     methods: {
+        logout() {
+            window.localStorage.removeItem('userToken')
+            window.location.replace("http://localhost:8081/login")
+        },
         /**
          * Function used to retrieve current user tasks from the
          * monty backend. Note that all requests require the JWT
@@ -70,7 +76,12 @@ export default {
          * once the tasks have bee retrieved
          */
         getTasks() {
-            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            // extract access token and URL from environment variables
+            const accessToken = localStorage.getItem('userToken')
+            if (!accessToken) {
+                window.location.replace("http://localhost:8081/login")
+                return
+            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/tasks'
 
             // generate request headers using access token
@@ -100,6 +111,10 @@ export default {
                     type: 'error',
                     text: 'failed to retrieve user tasks'
                 })
+                if (error.status === 401) {
+                    window.location.replace("http://localhost:8081/login")
+                    return
+                }
             })
         },
         /**
@@ -146,7 +161,13 @@ export default {
          * database with the given Task ID if the user has access to said task
          */
         deleteTask(taskId) {
-            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            // extract access token and URL from environment variables
+            const accessToken = localStorage.getItem('userToken')
+            if (!accessToken) {
+                console.log('no access token found. redirecting client to login page')
+                window.location.replace("http://localhost:8081/login")
+                return
+            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + taskId
 
             // generate request headers using access token
@@ -176,6 +197,11 @@ export default {
                     type: 'error',
                     text: 'unable to delete task'
                 })
+                if (error.status === 401) {
+                    console.log('invalid access token. redirecting to login')
+                    window.location.replace("http://localhost:8081/login")
+                    return
+                }
             })
         }
     },

@@ -35,6 +35,13 @@ services:
       JWT_SECRET: qJNJvkW2uVWtuPjN
       JWT_EXPIRY: 180
 
+  monty-login:
+    build:
+      context: ./login
+    container_name: monty-login
+    networks:
+    - monty
+
   reverse-proxy:
     build:
       context: ./reverse_proxy

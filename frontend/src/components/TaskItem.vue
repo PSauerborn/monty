@@ -90,7 +90,12 @@ export default {
         },
         editTask: function(remainingHours) {
             this.dialog = false;
-            const accessToken = process.env.VUE_APP_ACCESS_TOKEN
+            // extract access token and URL from environment variables
+            const accessToken = localStorage.getItem('userToken')
+            if (!accessToken) {
+                window.location.replace("http://localhost:8081/login")
+                return
+            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=UPDATE'
 
             // generate request headers using access token
@@ -120,6 +125,10 @@ export default {
                     type: 'error',
                     text: 'unable to edit task'
                 })
+                if (error.status === 401) {
+                    window.location.replace("http://localhost:8081/login")
+                    return
+                }
             })
         },
         completeTask: function() {
