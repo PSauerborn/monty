@@ -134,7 +134,7 @@ export default {
             // extract access token and URL from environment variables
             const accessToken = localStorage.getItem('userToken')
             if (!accessToken) {
-                window.location.replace("http://localhost:8081/login")
+                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                 return
             }
 
@@ -166,7 +166,7 @@ export default {
                     text: 'failed to create new task'
                 })
                 if (error.status === 401) {
-                    window.location.replace("http://localhost:8081/login")
+                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                     return
                 }
             })

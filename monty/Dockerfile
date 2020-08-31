@@ -22,4 +22,6 @@ RUN pip install -r requirements.txt
 
 COPY *.py ./
 
+EXPOSE 10999
+
 CMD ["python", "api.py"]

@@ -93,7 +93,7 @@ export default {
             // extract access token and URL from environment variables
             const accessToken = localStorage.getItem('userToken')
             if (!accessToken) {
-                window.location.replace("http://localhost:8081/login")
+                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                 return
             }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=UPDATE'
@@ -126,7 +126,7 @@ export default {
                     text: 'unable to edit task'
                 })
                 if (error.status === 401) {
-                    window.location.replace("http://localhost:8081/login")
+                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                     return
                 }
             })

@@ -36,7 +36,7 @@ export default {
             // extract access token and URL from environment variables
             const accessToken = localStorage.getItem('userToken')
             if (!accessToken) {
-                window.location.replace("http://localhost:8081/login")
+                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                 return
             }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/simulation'
@@ -68,7 +68,7 @@ export default {
                     text: 'failed to run task simulation'
                 })
                 if (error.status === 401) {
-                    window.location.replace("http://localhost:8081/login")
+                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                     return
                 }
             })

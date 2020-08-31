@@ -65,7 +65,7 @@ export default {
     methods: {
         logout() {
             window.localStorage.removeItem('userToken')
-            window.location.replace("http://localhost:8081/login")
+            window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
         },
         /**
          * Function used to retrieve current user tasks from the
@@ -79,7 +79,7 @@ export default {
             // extract access token and URL from environment variables
             const accessToken = localStorage.getItem('userToken')
             if (!accessToken) {
-                window.location.replace("http://localhost:8081/login")
+                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                 return
             }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/tasks'
@@ -112,7 +112,7 @@ export default {
                     text: 'failed to retrieve user tasks'
                 })
                 if (error.status === 401) {
-                    window.location.replace("http://localhost:8081/login")
+                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                     return
                 }
             })

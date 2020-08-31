@@ -8,11 +8,8 @@ services:
     networks:
     - monty
     - postgres-local
-    environment:
-      LOG_LEVEL: DEBUG
-      POSTGRES_HOST: postgres-local
-      POSTGRES_PASSWORD: monty-dev
-      JWT_SECRET: qJNJvkW2uVWtuPjN
+    env_file:
+    - .env
 
   monty-frontend:
     build:
@@ -21,40 +18,19 @@ services:
     networks:
     - monty
 
-  monty-identity-provider:
-    build:
-      context: ./identity_provider
-    container_name: identity-provider
-    networks:
-    - monty
-    - postgres-local
-    environment:
-      LOG_LEVEL: DEBUG
-      POSTGRES_HOST: postgres-local
-      POSTGRES_PASSWORD: monty-dev
-      JWT_SECRET: qJNJvkW2uVWtuPjN
-      JWT_EXPIRY: 180
-
-  monty-login:
-    build:
-      context: ./login
-    container_name: monty-login
-    networks:
-    - monty
-
   reverse-proxy:
     build:
       context: ./reverse_proxy
-    container_name: reverse-proxy
+    container_name: monty-proxy
     ports:
-    - "8081:8080"
+    - "8080:8080"
     networks:
     - monty
-    environment:
-      LOG_LEVEL: DEBUG
 
 networks:
   monty:
     name: monty
+  core:
+    name: core
   postgres-local:
     name: postgres-local
