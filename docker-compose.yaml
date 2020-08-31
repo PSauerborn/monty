@@ -7,7 +7,8 @@ services:
     container_name: monty-backend
     networks:
     - monty
-    - postgres-local
+    - postgres
+    - core
     env_file:
     - .env
 
@@ -17,20 +18,12 @@ services:
     container_name: monty-frontend
     networks:
     - monty
-
-  reverse-proxy:
-    build:
-      context: ./reverse_proxy
-    container_name: monty-proxy
-    ports:
-    - "8080:8080"
-    networks:
-    - monty
+    - core
 
 networks:
   monty:
     name: monty
   core:
     name: core
-  postgres-local:
-    name: postgres-local
+  postgres:
+    name: postgres
