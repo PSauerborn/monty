@@ -78,7 +78,7 @@ def create_task(body: NewTaskRequest) -> HTTPResponse:
     details = get_user_details(request.claims.uid, request.access_token)
     if not details:
         return HTTPResponse(success=False, http_code=500, message='internal server error')
-    task_id = create_user_task(details['user_id'], body)
+    task_id = create_user_task(details.payload.uid, body)
     return HTTPResponse(success=True, http_code=200, payload={'task_id': str(task_id)})
 
 @APP.route('/monty/tasks', method=['GET', 'OPTIONS'])
