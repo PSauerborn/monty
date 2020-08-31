@@ -44,26 +44,6 @@ def database_function(func: object):
     return wrapper
 
 @database_function
-def create_user(conn: object, cursor: object, uid: str):
-    """Function used to create user in postgres"""
-    user_id = uuid.uui4()
-    cursor.execute('INSERT INTO users(user_id, username) VALUES(%s, %s)', (str(user_id), uid))
-    conn.commit()
-    return user_id
-
-@database_function
-def get_all_users(conn: object, cursor: object):
-    """Function used to retreive all users"""
-    cursor.execute('SELECT user_id, username FROM users')
-    return cursor.fetchall()
-
-@database_function
-def get_user_details(conn: object, cursor: object, uid: str):
-    """Function used to retrieve a single user details"""
-    cursor.execute('SELECT user_id, username FROM users WHERE username=%s', (uid,))
-    return cursor.fetchone()
-
-@database_function
 def create_user_task(conn: object, cursor: object, user_id: uuid.UUID, body: NewTaskRequest):
     """Function used to retrieve a single user details"""
     task_id, now = uuid.uuid4(), datetime.utcnow()

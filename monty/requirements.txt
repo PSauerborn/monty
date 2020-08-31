@@ -5,3 +5,4 @@ numpy
 matplotlib
 waitress
 pyjwt
+requests

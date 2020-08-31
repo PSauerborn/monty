@@ -6,12 +6,13 @@ import json
 from bottle import Bottle, request, response, abort
 
 from config import LISTEN_ADDRESS, LISTEN_PORT
-from persistence import get_user_tasks, get_user_details, create_user_task, complete_task, \
+from persistence import get_user_tasks, create_user_task, complete_task, \
     get_task, get_user_task, delete_task, update_task_hours
 from data_models import dataclass_response, extract_request_body, HTTPResponse, NewTaskRequest, \
     Task, TaskUpdateRequest
 from simulation import analyse_task_set
 from authenticate import AuthenticationPlugin
+from helpers import get_user_details
 
 
 LOGGER = logging.getLogger(__name__)
@@ -74,9 +75,9 @@ def create_task(body: NewTaskRequest) -> HTTPResponse:
     """
     LOGGER.debug('received request to create new task %s for user %s', body, request.claims.uid)
     # create task in database and return task ID
-    details = get_user_details(request.claims.uid)
+    details = get_user_details(request.claims.uid, request.access_token)
     if not details:
-        return HTTPResponse(success=False, http_code=400, message='invalid user ID' + request.claims.uid)
+        return HTTPResponse(success=False, http_code=500, message='internal server error')
     task_id = create_user_task(details['user_id'], body)
     return HTTPResponse(success=True, http_code=200, payload={'task_id': str(task_id)})
 

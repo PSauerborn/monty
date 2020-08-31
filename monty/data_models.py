@@ -81,3 +81,16 @@ class Task(BaseModel):
     deadline: datetime
     completion_date: Optional[datetime]
 
+class UserDetails(BaseModel):
+    uid: uuid.UUID
+    username: str
+    email: str
+    created: datetime
+    admin: bool
+
+class IntrospectionResponse(BaseModel):
+    """dataclass containing introspection response"""
+    http_code: int
+    success: bool
+    payload: UserDetails
+

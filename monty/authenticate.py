@@ -69,7 +69,7 @@ class AuthenticationPlugin:
             if (token := extract_access_token()) is not None:
                 try:
                     # parse JWT token and inject into request headers
-                    request.claims = parse_jwt_token(token)
+                    request.claims, request.access_token = parse_jwt_token(token), token
                     LOGGER.debug('successfully parsed login token %s', request.claims)
                 except (jwt.InvalidSignatureError, ValidationError):
                     LOGGER.exception('received invalid JWT')

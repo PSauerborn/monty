@@ -4,14 +4,16 @@ import logging
 import json
 import uuid
 from math import floor
-
 from typing import List
 from datetime import datetime, timedelta
 from random import randint, choice, uniform
 
+import requests
 import numpy as np
+from pydantic import ValidationError
 
-from data_models import Task
+from config import AUTH_SERVICE_URL
+from data_models import Task, IntrospectionResponse
 
 LOGGER = logging.getLogger(__name__)
 
@@ -55,6 +57,22 @@ def create_tasks(count: int, output: str = './tasks.json', save: bool = False) -
         with open(output, 'w') as f:
             json.dump({'tasks': tasks}, f)
     return tasks
+
+def get_user_details(uid: str, token: str) -> dict:
+    """Function used to retreive user details
+    from the Authentication API
+
+    Arguments:
+        uid: str ID of user
+    """
+    url = AUTH_SERVICE_URL + '/user'
+    try:
+        data = {'uid': uid, 'token': token}
+        response = requests.post(url, data=data)
+
+        return IntrospectionResponse(**response.json())
+    except (requests.HTTPError, ValidationError):
+        LOGGER.exception('unable to retrieve user details from authentication server')
 
 if __name__ == '__main__':
 

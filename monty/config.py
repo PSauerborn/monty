@@ -58,6 +58,8 @@ POSTGRES_USER = override_value('postgres_user', 'postgres')
 POSTGRES_PASSWORD = override_value('postgres_password', '')
 POSTGRES_DB = override_value('postgres_db', 'monty')
 
+AUTH_SERVICE_URL = override_value('auth_service_url', 'http://164.90.180.125/authenticate')
+
 def get_postgres_connection_string() -> str:
     """Function used go generate the postgres
     connection string"""
