@@ -44,11 +44,11 @@ def database_function(func: object):
     return wrapper
 
 @database_function
-def create_user_task(conn: object, cursor: object, user_id: uuid.UUID, body: NewTaskRequest):
+def create_user_task(conn: object, cursor: object, uid: str, body: NewTaskRequest):
     """Function used to retrieve a single user details"""
     task_id, now = uuid.uuid4(), datetime.utcnow()
-    args = (str(task_id), body.task_title, str(user_id), body.content, body.priority, body.duration, body.duration, body.deadline, None, now)
-    cursor.execute('INSERT INTO tasks(task_id,task_title,user_id,content,priority,duration,hours_remaining,deadline,completion_date,created) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', args)
+    args = (str(task_id), body.task_title, uid, body.content, body.priority, body.duration, body.duration, body.deadline, None, now)
+    cursor.execute('INSERT INTO tasks(task_id,task_title,uid,content,priority,duration,hours_remaining,deadline,completion_date,created) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', args)
     conn.commit()
     return task_id
 
@@ -71,14 +71,14 @@ def update_task_hours(conn: object, cursor: object, task_id: str, body):
 @database_function
 def get_user_tasks(conn: object, cursor: object, uid: str):
     """Function used to retrieve a single user details"""
-    cursor.execute('SELECT task_id,task_title,content,priority,duration,deadline,completion_date,created,hours_remaining FROM tasks INNER JOIN users ON (tasks.user_id = users.user_id) WHERE username=%s', (uid,))
+    cursor.execute('SELECT task_id,task_title,content,priority,duration,deadline,completion_date,created,hours_remaining FROM tasks WHERE uid=%s', (uid,))
     return cursor.fetchall()
 
 @database_function
 def get_user_task(conn: object, cursor: object, uid: str, task_id: str):
     """Function used to retrieve a single task for
     a given user ID"""
-    cursor.execute('SELECT task_id,task_title,content,priority,duration,deadline,completion_date,created,hours_remaining FROM tasks INNER JOIN users ON (tasks.user_id = users.user_id) WHERE username=%s AND task_id=%s', (uid, task_id))
+    cursor.execute('SELECT task_id,task_title,content,priority,duration,deadline,completion_date,created,hours_remaining FROM tasks WHERE uid=%s AND task_id=%s', (uid, task_id))
     return cursor.fetchone()
 
 @database_function
