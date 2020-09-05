@@ -11,8 +11,8 @@ LOGGER = logging.getLogger(__name__)
 
 METRIC_FUNCTIONS = {
     'total_tasks': lambda tasks: len(tasks),
-    'completed_tasks': lambda : len([task for task in tasks if task.completion_date]),
-    'completed_in_time': lambda : len([task for task in tasks if task.completion_date and task.completion_date < task.deadline])
+    'completed_tasks': lambda tasks: len([task for task in tasks if task.completion_date]),
+    'completed_in_time': lambda tasks: len([task for task in tasks if task.completion_date and task.completion_date < task.deadline])
 }
 
 def get_user_metrics(uid : str, start: datetime, end: datetime) -> UserMetrics:
