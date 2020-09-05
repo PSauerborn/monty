@@ -6,14 +6,33 @@
                     <NewTaskModal  ref="modal" @taskCreated="updateTasks" @taskUpdated="updateTasks"/>
                 </v-dialog>
                 <v-btn icon @click.stop="dialog = true">
-                    <v-icon :size="60">mdi-plus-box-multiple</v-icon>
+                    <v-icon :size="45">mdi-plus-box-multiple</v-icon>
                 </v-btn>
+            </v-col>
+            <v-col cols=1>
+                <v-menu offset-y>
+                    <template v-slot:activator="{ on }">
+                        <v-btn icon v-on=on>
+                            <v-icon :size="45">mdi-cog</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-card>
+                        <v-list dense>
+                            <v-subheader>Options</v-subheader>
+                            <v-divider></v-divider>
+                            <v-list-item>
+                                <v-switch v-model="showCompleted" :label="'Show Completed'" @click.stop="getTasks"></v-switch>
+                            </v-list-item>
+                        </v-list>
+                    </v-card>
+                </v-menu>
+
             </v-col>
             <v-col cols=1 class="menu-icon" align="center" justify="center">
                 <v-menu offset-y>
                     <template v-slot:activator="{ on }">
                         <v-btn icon v-on=on>
-                            <v-icon :size="60">mdi-sort</v-icon>
+                            <v-icon :size="45">mdi-sort</v-icon>
                         </v-btn>
                     </template>
                     <v-card>
@@ -34,7 +53,7 @@
             </v-col>
             <v-col cols=1 class="menu-icon" align="center" justify="center">
                 <v-btn icon @click="logout">
-                    <v-icon :size="60">mdi-location-exit</v-icon>
+                    <v-icon :size="45">mdi-location-exit</v-icon>
                 </v-btn>
             </v-col>
         </v-row>
@@ -74,7 +93,7 @@ export default {
          */
         getTasks() {
             // extract access token and URL from environment variable
-            const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/tasks'
+            const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/tasks' + '?fetch_completed=' + this.showCompleted
 
             // generate request headers using access token
             let vm = this;
@@ -189,6 +208,7 @@ export default {
         return {
             dialog: false,
             activeSort: "created",
+            showCompleted: false,
             sortFunctions: [
                 {title: "priority", icon: "mdi-priority-high"},
                 {title: "created", icon: "mdi-sort-calendar-descending"},

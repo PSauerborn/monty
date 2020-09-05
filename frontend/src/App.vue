@@ -47,7 +47,8 @@
       //
     }),
     beforeMount: function() {
-      if (process.env.VUE_APP_DEVELOPMENT_MODE == "true") {
+      console.log(process.env.VUE_APP_DEVELOPMENT_MODE)
+      if (process.env.VUE_APP_DEVELOPMENT_MODE === "true") {
         shared.setDevToken()
       }
       shared.getAccessToken()

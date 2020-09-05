@@ -69,7 +69,13 @@ def get_tasks() -> HTTPResponse:
         HTTPResponse containing response
     """
     LOGGER.debug('received request to retrieve tasks for user %s', request.uid)
-    return HTTPResponse(success=True, http_code=200, payload=get_user_tasks(request.uid))
+    fetch_completed = request.query.fetch_completed if request.query.fetch_completed else 'false'
+    fetch_completed = fetch_completed.lower() in ['true', 't']
+
+    tasks = [Task(**row) for row in get_user_tasks(request.uid)]
+    if not fetch_completed:
+        tasks = [task for task in fetch_completed if not task.completion_date]
+    return HTTPResponse(success=True, http_code=200, payload=tasks)
 
 TASK_PATCH_OPERATIONS = {
     'COMPLETE': complete_task,
