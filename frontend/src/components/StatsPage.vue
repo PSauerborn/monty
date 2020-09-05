@@ -1,18 +1,13 @@
 <template>
-    <v-container id="stats-page-container">
-        <v-row v-if="Object.keys(results).length < 1" class="text-center">
-            <v-col cols=12 style="font-weight:bold">
-                analyse performance and results of task optimization simulations
+    <v-container id="stats-page-container" fluid>
+        <v-row align="center" justify="center">
+            <v-col cols=6 align="center" justify="center">
+                <apexchart width="500" type="bar" :options="metricChartOptions" :series="metrics"/>
             </v-col>
         </v-row>
-        <v-row v-if="Object.keys(results).length < 1" class="text-center">
-            <v-col cols=12>
-                <v-icon :size="72" @click="runSimulation">mdi-motion-play-outline</v-icon>
-            </v-col>
-        </v-row>
-        <v-row v-if="Object.keys(results).length > 1" class="text-center">
-            <v-col cols=12>
-                <GChart type="ColumnChart" :data="chartData" :options="chartOptions"/>
+        <v-row align="center" justify="center">
+            <v-col cols=6 align="center" justify="center">
+                <apexchart width="500" type="bar" :options="simulationChartOptions" :series="simulation"/>
             </v-col>
         </v-row>
     </v-container>
@@ -21,13 +16,12 @@
 <script>
 
 import axios from 'axios';
-import { GChart } from 'vue-google-charts'
-import shared from '../shared'
+import shared from '../shared';
 
 export default {
     name: "StatsPage",
     components: {
-        GChart
+
     },
     methods: {
         /**
@@ -46,7 +40,7 @@ export default {
                 headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
             }).then(function (response) {
                 // parse payload and display notification
-                 vm.results = response.data.payload
+                 vm.simulationResults = response.data.payload
                  vm.$notify({
                     group: 'main',
                     title: ' monty backend',
@@ -70,39 +64,144 @@ export default {
         formatSimType: function(simType) {
             var result = simType.replace('_', ' ').replace('_', ' ')
             return result.replace(/(^\w|\s\w)/g, m => m.toUpperCase())
-        }
+        },
+        getUserMetrics() {
+            // extract access token and URL from environment variables
+            const url = process.env.VUE_APP_MONTY_BACKEND_URL + `/metrics/${this.start}/${this.end}`
 
+            // generate request headers using access token
+            let vm = this;
+
+            axios({
+                method: 'get',
+                url: url,
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
+            }).then(function (response) {
+                // parse payload and display notification
+                 vm.$notify({
+                    group: 'main',
+                    title: ' monty backend',
+                    type: 'success',
+                    text: 'successfully ran task simulation'
+                })
+                // sort tasks according to the currently active sort function
+                vm.metricResults = response.data.payload
+            }).catch(function (error) {
+                console.log(error)
+                vm.$notify({
+                    group: 'main',
+                    title: ' monty backend',
+                    type: 'error',
+                    text: 'failed to run task simulation'
+                })
+                if (error.status === 401) {
+                    shared.redirectLogin()
+                }
+            })
+        }
     },
     computed: {
         /**
-         * Computed property used to format calculated simulation results
+         * Computed property used to format calculated simulation simulationResults
          * in format needed by the Graph
          */
         chartData() {
             var data = [['Sim Type', 'Completed', 'Important Completed', 'Completed in Time']]
             let vm = this;
-            Object.keys(vm.results).forEach((key) => {
+            Object.keys(vm.simulationResults).forEach((key) => {
                 data.push(
-                    [vm.formatSimType(key), vm.results[key]['completed'], vm.results[key]['important_completed'], vm.results[key]['completed_in_time']]
+                    [vm.formatSimType(key), vm.simulationResults[key]['completed'], vm.simulationResults[key]['important_completed'], vm.simulationResults[key]['completed_in_time']]
                 )
             })
             return data
         },
-        chartOptions() {
+        metricChartOptions() {
             return {
-                vAxis: {
-                    title: 'Percentage of Tasks Completed'
+                chart: {
+                    id: 'user-metrics'
                 },
-                legend: {
-                    position: 'top'
+                xaxis: {
+                    categories: ['Total Tasks', 'Tasks Completed', 'Tasks Completed in Time']
                 }
             }
+        },
+        metrics() {
+            const values = this.metricResults
+            const series = [{
+                name: 'user-metrics',
+                data: [
+                    values.total_tasks,
+                    values.completed_tasks,
+                    values.completed_in_time
+                ]
+            }]
+            console.log('returning series data ' + JSON.stringify(series))
+            return series
+        },
+        simulationChartOptions() {
+            return {
+                chart: {
+                    id: 'simulation-results'
+                },
+                xaxis: {
+                    categories: [
+                        'As They Come', 'Due First', 'Due Last', 'Important First',
+                        'Easier First', 'Easier, Important First', 'Easier, Due First'
+                    ]
+                }
+            }
+        },
+        simulation() {
+            const values = this.simulationResults
+            console.log(JSON.stringify(values))
+            const series = [
+                {
+                    name: 'Completed',
+                    data: [
+                        values.as_they_come.completed, values.due_first.completed, values.due_last.completed,
+                        values.important_first.completed, values.easier_first.completed, values.easier_important_first.completed,
+                        values.easier_due_first.completed
+                    ]
+                },
+                {
+                    name: 'Completed In Time',
+                    data: [
+                        values.as_they_come.completed_in_time, values.due_first.completed_in_time, values.due_last.completed_in_time,
+                        values.important_first.completed_in_time, values.easier_first.completed_in_time, values.easier_important_first.completed_in_time,
+                        values.easier_due_first.completed_in_time
+                    ]
+                },
+                {
+                    name: 'Important Completed',
+                    data: [
+                        values.as_they_come.important_completed, values.due_first.important_completed, values.due_last.important_completed,
+                        values.important_first.important_completed, values.easier_first.important_completed, values.easier_important_first.important_completed,
+                        values.easier_due_first.important_completed
+                    ]
+                }
+            ]
+            return series
         }
     },
     data() {
         return {
-            results: {}
+            start: '2020-06-01',
+            end: '2020-09-05',
+            simulationResults: {
+                as_they_come: { completed: 0, completed_in_time: 0, important_completed: 0 },
+                due_first: { completed: 0, completed_in_time: 0, important_completed: 0 },
+                due_last: { completed: 0, completed_in_time: 0, important_completed: 0 },
+                important_first: { completed: 0, completed_in_time: 0, important_completed: 0 },
+                easier_first: { completed: 0, completed_in_time: 0, important_completed: 0 },
+                easier_important_first: { completed: 0, completed_in_time: 0, important_completed: 0 },
+                easier_due_first: { completed: 0, completed_in_time: 0, important_completed: 0 }
+            },
+            metricResults: { total_tasks: 0, completed_tasks: 0, completed_in_time: 0 }
         }
+    },
+    mounted() {
+        this.getUserMetrics()
+        this.runSimulation()
     }
 }
 </script>

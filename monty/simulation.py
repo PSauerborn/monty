@@ -132,9 +132,9 @@ def analyse_task_set(hours_per_day: int, tasks: List[Task]) -> dict:
     for sim_type in SORTING_FUNCTIONS:
         completed, important_completed, completed_in_time = run_simulation(hours_per_day, copy.deepcopy(tasks), sim_type=sim_type)
         results[sim_type] = {
-            'completed': completed,
-            'important_completed': important_completed,
-            'completed_in_time': completed_in_time
+            'completed': round(completed, 2),
+            'important_completed': round(important_completed, 2),
+            'completed_in_time': round(completed_in_time, 2)
         }
         LOGGER.info('completed: %s important completed: %s completed in time: %s', completed, important_completed, completed_in_time)
     return results
