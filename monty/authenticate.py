@@ -31,7 +31,7 @@ class AuthenticationPlugin:
         def wrapper(*args: tuple, **kwargs: dict):
             if (user := request.headers.get('X-Authenticated-Userid')) is not None:
                 request.uid = user
-            else
+            else:
                 abort(401, 'unauthorized')
             return callback(*args, **kwargs)
         return wrapper
