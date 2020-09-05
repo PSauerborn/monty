@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from persistence import get_user_tasks_in_range
-from data_models import UserMetrics
+from data_models import UserMetrics, Task
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ METRIC_FUNCTIONS = {
 
 def get_user_metrics(uid : str, start: datetime, end: datetime) -> UserMetrics:
     """Function used to retrieve user metrics"""
-    tasks = get_user_tasks_in_range(uid, start, end)
+    tasks = [Task(**task) for task in get_user_tasks_in_range(uid, start, end)]
     metrics = {metric: func(tasks) for metric, func in METRIC_FUNCTIONS.items()}
     return UserMetrics(**metrics.update('uid', uid))
 
