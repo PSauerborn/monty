@@ -19,5 +19,6 @@ def get_user_metrics(uid : str, start: datetime, end: datetime) -> UserMetrics:
     """Function used to retrieve user metrics"""
     tasks = [Task(**task) for task in get_user_tasks_in_range(uid, start, end)]
     metrics = {metric: func(tasks) for metric, func in METRIC_FUNCTIONS.items()}
-    return UserMetrics(**metrics.update('uid', uid))
+    metrics.update('uid', uid)
+    return UserMetrics(**metrics)
 
