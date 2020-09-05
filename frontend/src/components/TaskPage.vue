@@ -1,49 +1,45 @@
 <template>
     <v-container>
-        <v-row align="center" justify="center">
-            <v-col cols=8>
+        <v-row align="center" justify="center" class="toolbar-icons">
+            <v-col cols=1 class="menu-icon" align="center" justify="center">
                 <v-dialog v-model="dialog" max-width="50%">
                     <NewTaskModal  ref="modal" @taskCreated="updateTasks" @taskUpdated="updateTasks"/>
                 </v-dialog>
-                <v-toolbar>
-                    <v-icon>mdi-apps</v-icon>
-                    <v-divider class="mx-4" vertical></v-divider>
-                    <v-toolbar-title>View, Create and Modify Tasks</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                    <v-toolbar-items>
-                        <v-btn icon @click.stop="dialog = true">
-                            <v-icon>mdi-plus-box-multiple</v-icon>
+                <v-btn icon @click.stop="dialog = true">
+                    <v-icon :size="60">mdi-plus-box-multiple</v-icon>
+                </v-btn>
+            </v-col>
+            <v-col cols=1 class="menu-icon" align="center" justify="center">
+                <v-menu offset-y>
+                    <template v-slot:activator="{ on }">
+                        <v-btn icon v-on=on>
+                            <v-icon :size="60">mdi-sort</v-icon>
                         </v-btn>
-                        <v-menu offset-y>
-                            <template v-slot:activator="{ on }">
-                                <v-btn icon v-on=on>
-                                    <v-icon>mdi-sort</v-icon>
-                                </v-btn>
-                            </template>
-                            <v-card>
-                                <v-list dense>
-                                    <v-subheader>Sort By</v-subheader>
-                                    <v-divider></v-divider>
-                                    <v-list-item v-for="(func, index) in sortFunctions" :key="index" @click="sortTasks(func.title)">
-                                        <v-list-item-avatar>
-                                            <v-icon>{{ func.icon }}</v-icon>
-                                        </v-list-item-avatar>
-                                        <v-list-item-title>
-                                            {{ func.title }}
-                                        </v-list-item-title>
-                                    </v-list-item>
-                                </v-list>
-                            </v-card>
-                        </v-menu>
-                        <v-btn icon @click="logout">
-                            <v-icon>mdi-location-exit</v-icon>
-                        </v-btn>
-                    </v-toolbar-items>
-                </v-toolbar>
+                    </template>
+                    <v-card>
+                        <v-list dense>
+                            <v-subheader>Sort By</v-subheader>
+                            <v-divider></v-divider>
+                            <v-list-item v-for="(func, index) in sortFunctions" :key="index" @click="sortTasks(func.title)">
+                                <v-list-item-avatar>
+                                    <v-icon>{{ func.icon }}</v-icon>
+                                </v-list-item-avatar>
+                                <v-list-item-title>
+                                    {{ func.title }}
+                                </v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-card>
+                </v-menu>
+            </v-col>
+            <v-col cols=1 class="menu-icon" align="center" justify="center">
+                <v-btn icon @click="logout">
+                    <v-icon :size="60">mdi-location-exit</v-icon>
+                </v-btn>
             </v-col>
         </v-row>
         <v-row v-for="task in tasks" :key="task.task_id" class="text-center" align="center" justify="center">
-            <v-col cols=6>
+            <v-col cols=6 align="center" justify="center">
                 <TaskItem v-bind:task="task" @deleteTask="deleteTask" @taskUpdated="updateTasks"/>
             </v-col>
         </v-row>
@@ -55,6 +51,7 @@
 import axios from 'axios'
 import TaskItem from './TaskItem';
 import NewTaskModal from './NewTaskModal';
+import shared from '../shared';
 
 export default {
     name: "TaskPage",
@@ -65,7 +62,7 @@ export default {
     methods: {
         logout() {
             window.localStorage.removeItem('userToken')
-            window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
+            shared.redirectLogin()
         },
         /**
          * Function used to retrieve current user tasks from the
@@ -76,22 +73,15 @@ export default {
          * once the tasks have bee retrieved
          */
         getTasks() {
-            // extract access token and URL from environment variables
-            const accessToken = localStorage.getItem('userToken')
-            if (!accessToken) {
-                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                return
-            }
+            // extract access token and URL from environment variable
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/tasks'
 
             // generate request headers using access token
-            let headers = {'Authorization': 'Bearer ' + accessToken}
             let vm = this;
-
             axios({
                 method: 'get',
                 url: url,
-                headers: headers
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
             }).then(function (response) {
                 // parse payload and display notification
                  vm.tasks = response.data.payload
@@ -162,22 +152,13 @@ export default {
          */
         deleteTask(taskId) {
             // extract access token and URL from environment variables
-            const accessToken = localStorage.getItem('userToken')
-            if (!accessToken) {
-                console.log('no access token found. redirecting client to login page')
-                window.location.replace("http://localhost:8081/login")
-                return
-            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + taskId
-
-            // generate request headers using access token
-            let headers = {'Authorization': 'Bearer ' + accessToken}
             let vm = this;
 
             axios({
                 method: 'delete',
                 url: url,
-                headers: headers
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
             }).then(function (response) {
                 // parse payload and display notification
                 console.log(response)
@@ -199,8 +180,7 @@ export default {
                 })
                 if (error.status === 401) {
                     console.log('invalid access token. redirecting to login')
-                    window.location.replace("http://localhost:8081/login")
-                    return
+                    shared.redirectLogin()
                 }
             })
         }
@@ -273,4 +253,13 @@ export default {
 
 <style scoped>
 
+.menu-icon {
+    margin-left: 20px;
+    margin-right: 20px
+}
+
+.toolbar-icons {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
 </style>

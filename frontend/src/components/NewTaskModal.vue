@@ -74,6 +74,7 @@
 import axios from 'axios'
 import { required, numeric, max } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate'
+import shared from '../shared'
 
 setInteractionMode('eager')
 
@@ -132,22 +133,15 @@ export default {
             }
 
             // extract access token and URL from environment variables
-            const accessToken = localStorage.getItem('userToken')
-            if (!accessToken) {
-                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                return
-            }
-
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task'
             // generate request headers using access token
-            let headers = {'Authorization': 'Bearer ' + accessToken}
             let vm = this;
 
             axios({
                 method: 'post',
                 data: payload,
                 url: url,
-                headers: headers
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
             }).then(function (response) {
                  vm.$notify({
                     group: 'main',
@@ -166,8 +160,7 @@ export default {
                     text: 'failed to create new task'
                 })
                 if (error.status === 401) {
-                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                    return
+                    shared.redirectLogin()
                 }
             })
         },

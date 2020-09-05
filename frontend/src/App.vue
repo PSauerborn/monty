@@ -32,6 +32,7 @@
   import MontyLogo from './components/MontyLogo';
   import TaskPage from './components/TaskPage';
   import StatsPage from './components/StatsPage';
+  import shared from './shared';
 
   export default {
     name: 'App',
@@ -45,6 +46,12 @@
     data: () => ({
       //
     }),
+    beforeMount: function() {
+      if (process.env.VUE_APP_DEVELOPMENT_MODE == "true") {
+        shared.setDevToken()
+      }
+      shared.getAccessToken()
+    }
   };
 </script>
 

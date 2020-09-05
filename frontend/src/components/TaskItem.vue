@@ -3,7 +3,7 @@
         <v-dialog v-model="dialog" max-width="20%">
             <UpdateTaskModal ref="updateModal" :remainingHours="task.hours_remaining" @hoursUpdated="editTask"/>
         </v-dialog>
-        <v-card :id="task.task_id">
+        <v-card :id="task.task_id" max-width="550px">
             <v-row class="text-center" style="font-size:12px">
                 <v-col cols=3>
                     Priority: {{ task.priority }}
@@ -62,6 +62,7 @@
 
 import axios from 'axios'
 import moment from 'moment'
+import shared from '../shared'
 
 import UpdateTaskModal from './UpdateTaskModal'
 
@@ -91,21 +92,15 @@ export default {
         editTask: function(remainingHours) {
             this.dialog = false;
             // extract access token and URL from environment variables
-            const accessToken = localStorage.getItem('userToken')
-            if (!accessToken) {
-                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                return
-            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=UPDATE'
 
             // generate request headers using access token
-            let headers = {'Authorization': 'Bearer ' + accessToken}
             let vm = this;
 
             axios({
                 method: 'patch',
                 url: url,
-                headers: headers,
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()},
                 data: {remaining_hours: remainingHours }
             }).then(function (response) {
                 // parse payload and display notification
@@ -126,27 +121,21 @@ export default {
                     text: 'unable to edit task'
                 })
                 if (error.status === 401) {
-                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                    return
+                    shared.redirectLogin()
                 }
             })
         },
         completeTask: function() {
-            const accessToken = localStorage.getItem('userToken')
-            if (!accessToken) {
-                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                return
-            }
+
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=COMPLETE'
 
             // generate request headers using access token
-            let headers = {'Authorization': 'Bearer ' + accessToken}
             let vm = this;
 
             axios({
                 method: 'patch',
                 url: url,
-                headers: headers,
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()},
                 data: {}
             }).then(function (response) {
                 // parse payload and display notification
@@ -167,6 +156,9 @@ export default {
                     type: 'error',
                     text: 'unable to complete task'
                 })
+                if (error.status === 401) {
+                    shared.redirectLogin()
+                }
             })
         }
     },

@@ -22,6 +22,7 @@
 
 import axios from 'axios';
 import { GChart } from 'vue-google-charts'
+import shared from '../shared'
 
 export default {
     name: "StatsPage",
@@ -34,21 +35,15 @@ export default {
          */
         runSimulation: function() {
             // extract access token and URL from environment variables
-            const accessToken = localStorage.getItem('userToken')
-            if (!accessToken) {
-                window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                return
-            }
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/simulation'
 
             // generate request headers using access token
-            let headers = {'Authorization': 'Bearer ' + accessToken}
             let vm = this;
 
             axios({
                 method: 'get',
                 url: url,
-                headers: headers
+                headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
             }).then(function (response) {
                 // parse payload and display notification
                  vm.results = response.data.payload
@@ -68,8 +63,7 @@ export default {
                     text: 'failed to run task simulation'
                 })
                 if (error.status === 401) {
-                    window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
-                    return
+                    shared.redirectLogin()
                 }
             })
         },
