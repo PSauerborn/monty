@@ -74,7 +74,7 @@ def get_tasks() -> HTTPResponse:
 
     tasks = [Task(**row) for row in get_user_tasks(request.uid)]
     if not fetch_completed:
-        tasks = [task for task in fetch_completed if not task.completion_date]
+        tasks = [task for task in tasks if not task.completion_date]
     return HTTPResponse(success=True, http_code=200, payload=tasks)
 
 TASK_PATCH_OPERATIONS = {
