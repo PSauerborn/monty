@@ -1,13 +1,18 @@
 <template>
     <v-container id="stats-page-container" fluid>
         <v-row align="center" justify="center">
-            <v-col cols=6 align="center" justify="center">
+            <v-col cols=4 align="center" justify="center" class="chart-column">
                 <apexchart width="500" type="bar" :options="metricChartOptions" :series="metrics"/>
             </v-col>
+            <v-divider class="mx-4" vertical="true"></v-divider>
+            <v-col cols=4 align="center" justify="center" class="chart-column">
+                <apexchart width="500" type="donut" :options="donutChartOptions" :series="donut"/>
+            </v-col>
         </v-row>
+        <v-divider class="mx-4"></v-divider>
         <v-row align="center" justify="center">
-            <v-col cols=6 align="center" justify="center">
-                <apexchart width="500" type="bar" :options="simulationChartOptions" :series="simulation"/>
+            <v-col cols=6 align="center" justify="center" class="chart-column">
+                <apexchart width="1000" height="250" type="bar" :options="simulationChartOptions" :series="simulation"/>
             </v-col>
         </v-row>
     </v-container>
@@ -101,20 +106,6 @@ export default {
         }
     },
     computed: {
-        /**
-         * Computed property used to format calculated simulation simulationResults
-         * in format needed by the Graph
-         */
-        chartData() {
-            var data = [['Sim Type', 'Completed', 'Important Completed', 'Completed in Time']]
-            let vm = this;
-            Object.keys(vm.simulationResults).forEach((key) => {
-                data.push(
-                    [vm.formatSimType(key), vm.simulationResults[key]['completed'], vm.simulationResults[key]['important_completed'], vm.simulationResults[key]['completed_in_time']]
-                )
-            })
-            return data
-        },
         metricChartOptions() {
             return {
                 chart: {
@@ -138,6 +129,26 @@ export default {
             console.log('returning series data ' + JSON.stringify(series))
             return series
         },
+        donutChartOptions() {
+            return {
+                chart: {
+                    id: 'user-metrics'
+                },
+                xaxis: {
+                    categories: ['Tasks Completed', 'Tasks Completed in Time']
+                },
+                labels: ['Completed', 'Completed in Time']
+            }
+        },
+        donut() {
+            const values = this.metricResults
+            const series = [
+                    values.completed_tasks,
+                    values.completed_in_time
+                ]
+            console.log('returning series data ' + JSON.stringify(series))
+            return series
+        },
         simulationChartOptions() {
             return {
                 chart: {
@@ -148,7 +159,14 @@ export default {
                         'As They Come', 'Due First', 'Due Last', 'Important First',
                         'Easier First', 'Easier, Important First', 'Easier, Due First'
                     ]
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        endingShape: 'rounded'
+                    }
                 }
+
             }
         },
         simulation() {
@@ -207,5 +225,9 @@ export default {
 </script>
 
 <style scoped>
+
+.chart-column {
+    margin: 20px;
+}
 
 </style>
