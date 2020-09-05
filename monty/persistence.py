@@ -82,6 +82,12 @@ def get_user_task(conn: object, cursor: object, uid: str, task_id: str):
     return cursor.fetchone()
 
 @database_function
+def get_user_tasks_in_range(conn: object, cursor: object, uid: str, start: datetime, end: datetime):
+    """Function used to retrieve user tasks in time range"""
+    cursor.execute('SELECT task_id,task_title,content,priority,duration,deadline,completion_date,created,hours_remaining FROM tasks WHERE uid=%s AND created > %s AND created < %s', (uid, start, end))
+    return cursor.fetchall()
+
+@database_function
 def get_task(conn: object, cursor: object, task_id: uuid.UUID):
     """Function used to retrieve a single user details"""
     cursor.execute('SELECT task_id,task_title,content,priority,duration,deadline,completion_date,created,hours_remaining FROM tasks WHERE task_id=%s', (task_id,))

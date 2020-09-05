@@ -4,6 +4,8 @@ import logging
 import json
 
 from bottle import Bottle, request, response, abort
+from dateutil import parser
+from dateutil.parser._parser import ParserError
 
 from config import LISTEN_ADDRESS, LISTEN_PORT
 from persistence import get_user_tasks, create_user_task, complete_task, \
@@ -13,6 +15,7 @@ from data_models import dataclass_response, extract_request_body, HTTPResponse, 
 from simulation import analyse_task_set
 from authenticate import AuthenticationPlugin
 from helpers import get_user_details
+from metrics import get_user_metrics
 
 
 LOGGER = logging.getLogger(__name__)
@@ -137,6 +140,26 @@ def run_user_simulation() -> HTTPResponse:
     tasks = [Task(**dict(row)) for row in get_user_tasks(request.uid)]
     LOGGER.info('running simulation for %s tasks', len(tasks))
     return HTTPResponse(success=True, http_code=200, payload=analyse_task_set(8, tasks))
+
+@APP.route('/monty/metrics/<start>/<end>', method=['GET', 'OPTIONS'])
+@dataclass_response
+def get_metrics(start: str, end: str) -> HTTPResponse:
+    """API route used to retrieve user metrics
+    from database
+
+    Returns:
+        HTTPResponse containing response
+    """
+    LOGGER.debug('received request to get metrics for user %s', request.uid)
+    try:
+        start, end = parser.parse(start), parser.parse(end)
+        if start > end:
+            raise ParserError
+        return HTTPResponse(success=True, http_code=200, payload=get_user_metrics(request.uid, start, end))
+    except ParserError:
+        LOGGER.error('received invalid timestamps %s and %s', start, end)
+        return HTTPResponse(success=False, http_code=400, message='invalid time range')
+
 
 if __name__ == '__main__':
 

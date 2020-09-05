@@ -94,3 +94,10 @@ class IntrospectionResponse(BaseModel):
     success: bool
     payload: UserDetails
 
+class UserMetrics(BaseModel):
+    """dataclass containing user metrics response"""
+    uid: str
+    total_tasks: int
+    completed_tasks: int
+    completed_in_time: int
+

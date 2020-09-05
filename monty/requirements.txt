@@ -6,3 +6,4 @@ matplotlib
 waitress
 pyjwt
 requests
+python-dateutil
