@@ -29,6 +29,11 @@ export default {
         remainingHours: Number
     },
     methods: {
+        /**
+         * Function used to emit event that the
+         * parent component uses to update tasks
+         * in the database
+         */
         updateTask: function() {
             this.$emit('hoursUpdated', this.hourEntry)
         }

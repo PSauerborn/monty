@@ -120,7 +120,7 @@ export default {
                     type: 'error',
                     text: 'failed to retrieve user tasks'
                 })
-                if (error.status === 401) {
+                if (error.response.status === 401) {
                     window.location.replace(process.env.VUE_APP_LOGIN_REDIRECT)
                     return
                 }
@@ -197,7 +197,7 @@ export default {
                     type: 'error',
                     text: 'unable to delete task'
                 })
-                if (error.status === 401) {
+                if (error.response.status === 401) {
                     console.log('invalid access token. redirecting to login')
                     shared.redirectLogin()
                 }

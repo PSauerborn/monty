@@ -30,13 +30,13 @@ export default {
     },
     methods: {
         /**
-         * Function used to run simulation with given user tasks
+         * Function used to run simulation with given user tasks.
+         * The simulation data is then used to plot the bar graph
+         * containing the simulation results
          */
         runSimulation: function() {
             // extract access token and URL from environment variables
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/simulation'
-
-            // generate request headers using access token
             let vm = this;
 
             axios({
@@ -44,7 +44,6 @@ export default {
                 url: url,
                 headers: {'Authorization': 'Bearer ' + shared.getAccessToken()}
             }).then(function (response) {
-                // parse payload and display notification
                  vm.simulationResults = response.data.payload
                  vm.$notify({
                     group: 'main',
@@ -52,7 +51,6 @@ export default {
                     type: 'success',
                     text: 'successfully ran task simulation'
                 })
-                // sort tasks according to the currently active sort function
             }).catch(function (error) {
                 console.log(error)
                 vm.$notify({
@@ -61,7 +59,7 @@ export default {
                     type: 'error',
                     text: 'failed to run task simulation'
                 })
-                if (error.status === 401) {
+                if (error.response.status === 401) {
                     shared.redirectLogin()
                 }
             })
@@ -70,11 +68,14 @@ export default {
             var result = simType.replace('_', ' ').replace('_', ' ')
             return result.replace(/(^\w|\s\w)/g, m => m.toUpperCase())
         },
+        /**
+         * Function used to retrieve the user metrics from the
+         * backend. User metrics are used for the bar chart
+         * that displays the total task count(s)
+         */
         getUserMetrics() {
             // extract access token and URL from environment variables
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + `/metrics/${this.start}/${this.end}`
-
-            // generate request headers using access token
             let vm = this;
 
             axios({
@@ -87,7 +88,7 @@ export default {
                     group: 'main',
                     title: ' monty backend',
                     type: 'success',
-                    text: 'successfully ran task simulation'
+                    text: 'successfully retrieved user metrics'
                 })
                 // sort tasks according to the currently active sort function
                 vm.metricResults = response.data.payload
@@ -97,15 +98,19 @@ export default {
                     group: 'main',
                     title: ' monty backend',
                     type: 'error',
-                    text: 'failed to run task simulation'
+                    text: 'failed to retrieve user metrics'
                 })
-                if (error.status === 401) {
+                if (error.response.status === 401) {
                     shared.redirectLogin()
                 }
             })
         }
     },
     computed: {
+        /**
+         * Computed property used to define the chart options for
+         * the user metrics bar chart
+         */
         metricChartOptions() {
             return {
                 chart: {
@@ -116,6 +121,10 @@ export default {
                 }
             }
         },
+        /**
+         * Computed property used to cast the user metrics data
+         * into the format required for the user metrics bar chart
+         */
         metrics() {
             const values = this.metricResults
             const series = [{
@@ -129,6 +138,10 @@ export default {
             console.log('returning series data ' + JSON.stringify(series))
             return series
         },
+        /**
+         * Computed property used to define the chart options
+         * for the user metrics donut chart
+         */
         donutChartOptions() {
             return {
                 chart: {
@@ -140,6 +153,10 @@ export default {
                 labels: ['Completed', 'Completed in Time']
             }
         },
+        /**
+         * Computed property used to cast the user metrics data
+         * into the format required for the user metrics donut chart
+         */
         donut() {
             const values = this.metricResults
             const series = [
@@ -149,6 +166,10 @@ export default {
             console.log('returning series data ' + JSON.stringify(series))
             return series
         },
+        /**
+         * Computed property used to define the chart options
+         * for the bar graph showing the simulation results
+         */
         simulationChartOptions() {
             return {
                 chart: {
@@ -169,6 +190,11 @@ export default {
 
             }
         },
+        /**
+         * Computed property used to cast the simulation data
+         * into the format required for the simulation results
+         * bar chart
+         */
         simulation() {
             const values = this.simulationResults
             console.log(JSON.stringify(values))
@@ -218,6 +244,7 @@ export default {
         }
     },
     mounted() {
+        // get user metrics and run simulation when component is mounted
         this.getUserMetrics()
         this.runSimulation()
     }

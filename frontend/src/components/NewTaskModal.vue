@@ -131,10 +131,8 @@ export default {
                 duration: this.taskDuration,
                 deadline: this.taskDeadline
             }
-
-            // extract access token and URL from environment variables
+            // extract backend URL from environment variables
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task'
-            // generate request headers using access token
             let vm = this;
 
             axios({
@@ -159,7 +157,8 @@ export default {
                     type: 'error',
                     text: 'failed to create new task'
                 })
-                if (error.status === 401) {
+                // if unauthorized response is received, rediret back to login
+                if (error.response.status === 401) {
                     shared.redirectLogin()
                 }
             })

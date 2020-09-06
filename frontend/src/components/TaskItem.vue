@@ -86,15 +86,26 @@ export default {
         }
     },
     methods: {
+        /**
+         * Function used to delete a task item in the user
+         * database. Note that its the parent component that
+         * makes the request to the backend
+         */
         deleteTask: function() {
             this.$emit('deleteTask', this.task.task_id)
         },
+        /**
+         * Function used to edit the remaining hours for a task in the
+         * user database. Tasks are updated using PATCH requests
+         * to the backend, with the number of remaining hours in the
+         * request body
+         */
         editTask: function(remainingHours) {
+            // close dialog box
             this.dialog = false;
-            // extract access token and URL from environment variables
-            const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=UPDATE'
 
-            // generate request headers using access token
+            // extract URL from environment variables
+            const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=UPDATE'
             let vm = this;
 
             axios({
@@ -120,16 +131,20 @@ export default {
                     type: 'error',
                     text: 'unable to edit task'
                 })
-                if (error.status === 401) {
+                if (error.response.status === 401) {
                     shared.redirectLogin()
                 }
             })
         },
+        /**
+         * Function used to complete a particular task in the
+         * user database. Tasks are completed by sending a PATCH
+         * request to the backend with the task ID in the request
+         * path
+         */
         completeTask: function() {
 
             const url = process.env.VUE_APP_MONTY_BACKEND_URL + '/task/' + this.task.task_id + '?operation=COMPLETE'
-
-            // generate request headers using access token
             let vm = this;
 
             axios({
@@ -156,7 +171,7 @@ export default {
                     type: 'error',
                     text: 'unable to complete task'
                 })
-                if (error.status === 401) {
+                if (error.response.status === 401) {
                     shared.redirectLogin()
                 }
             })
@@ -167,10 +182,10 @@ export default {
             return this.taskColors[this.task.priority]
         },
         createdDate: function() {
-            return moment(String(this.task.created)).format('MM/DD/YYYY')
+            return moment(String(this.task.created)).format('DD/MM/YYYY')
         },
         deadlineDate: function() {
-            return moment(String(this.task.deadline)).format('MM/DD/YYYY')
+            return moment(String(this.task.deadline)).format('DD/MM/YYYY')
         },
         completed: function() {
             console.log(this.task.completion_date)
@@ -192,6 +207,7 @@ export default {
     mounted() {
         let vm = this;
 
+        // set border color on task item based on deadline
         var card = document.getElementById(vm.task.task_id);
         card.style.borderLeft = vm.borderColor
     }
